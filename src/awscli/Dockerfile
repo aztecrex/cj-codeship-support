@@ -6,5 +6,8 @@ RUN apk -Uv add python py-pip \
  && apk --purge -v del py-pip \
  && rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["/usr/bin/aws"]
+ENV AWS_REGION us-east-1
+
+COPY entrypoint.awscli /usr/local/bin/entrypoint.awscli
+ENTRYPOINT ["entrypoint.awscli"]
 CMD ["--version"]
