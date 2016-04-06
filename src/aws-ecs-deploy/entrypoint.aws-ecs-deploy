@@ -31,5 +31,9 @@ go() {
 
 }
 
-go $*
+if [ "$1" == "sh" ]; then
+  exec /bin/bash
+  exit 1
+fi
 
+go $*
