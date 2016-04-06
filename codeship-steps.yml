@@ -7,7 +7,7 @@
       steps:
         - service: aws_ecs_deploy
           command: /bin/true
-        - service: awscli
+        - service: aws_cli
           command: --version
 
 - type: serial
@@ -15,16 +15,16 @@
   steps:
     - type: push
       service: aws_base
-      image_name: cjengineering/aws-base
+      image_name: cjengineering/codeship-aws-base
       image_tag: latest
       registry: &REGISTRY https://index.docker.io/v1/
     - type: push
-      service: awscli
-      image_name: cjengineering/awscli
+      service: aws_cli
+      image_name: cjengineering/codeship-aws-cli
       image_tag: latest
       registry: *REGISTRY
     - type: push
       service: aws_ecs_deploy
-      image_name: cjengineering/aws-ecs-deploy
+      image_name: cjengineering/codeship-aws-ecs-deploy
       image_tag: latest
       registry: *REGISTRY
