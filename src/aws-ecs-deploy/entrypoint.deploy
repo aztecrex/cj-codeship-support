@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ "$1" = "sh" ]; then
+  exec /bin/sh
+elif [ "$2" = "" ]; then
+  echo service and cluster required 2>&1
+else
+  service=$1
+  cluster=$2
+  taskDef=$(entrypoint.awscli ecs describe-services --service $service --cluster $cluster --output text --query 'services[0]|   taskDefinition')
+  taskSpec=$(entrypoint.awscli ecs describe-task-definition --task-definition $taskDef --query 'taskDefinition | {containerDefinitions:containerDefinitions,volumes:volumes,family:family}')
+  newTaskDef=$(entrypoint.awscli ecs register-task-definition --cli-input-json "$taskSpec" --output text --query 'taskDefinition.taskDefinitionArn')
+  entrypoint.awscli ecs update-service --service $service --cluster $cluster --task-definition $newTaskDef
+fi
