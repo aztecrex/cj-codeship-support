@@ -1,0 +1,6 @@
+awscli:
+  build: ./src/awscli
+
+aws_ecs_deploy:
+  build: ./src/aws-ecs-deploy
+
