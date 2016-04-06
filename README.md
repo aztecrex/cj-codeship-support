@@ -11,9 +11,9 @@ To run an aws command, use ```docker run aws <command> [args...]``` .  To
 inject properties, use the docker environment (```-e```) or environment
 file (```--env-file```) options.
 
-To use with Codeship, encrypt an environment file containing your
-credentials using ```jet encrypt aws.env aws.encrypted.env``` and configure
-as a service:
+To use with Codeship, encrypt an environment file containing appropriate
+credentials using ```jet encrypt aws.env aws.encrypted.env``` (see [codeship jet](https://codeship.com/documentation/docker/installation/#jet) for info)
+and configure as a service:
 
 #### unencrypted aws environment file, aws.env
 ```sh
@@ -37,8 +37,8 @@ Use the service with any steps you need in your pipeline.
 - type: serial
   service: aws
   steps:
-    - command: cloudformation create-stack --stack-name network --template-body file://network.json
+    - command: >
+       cloudformation create-stack --stack-name network
+       --template-body file://network.json
     - command:  missiles launch --silo-name alpha
 ```
-
-
