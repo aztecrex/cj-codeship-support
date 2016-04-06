@@ -14,10 +14,15 @@
   encrypted_dockercfg_path: dockercfg.encrypted
   steps:
     - type: push
+      service: aws_base
+      image_name: cjengineering/aws-base
+      image_tag: latest
+      registry: &REGISTRY https://index.docker.io/v1/
+    - type: push
       service: awscli
       image_name: cjengineering/awscli
       image_tag: latest
-      registry: &REGISTRY https://index.docker.io/v1/
+      registry: *REGISTRY
     - type: push
       service: aws_ecs_deploy
       image_name: cjengineering/aws-ecs-deploy
