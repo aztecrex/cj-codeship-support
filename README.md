@@ -1,3 +1,6 @@
+
+[ ![Codeship Status for aztecrex/cj-codeship-support](https://codeship.com/projects/63f2a570-de54-0133-9b49-6a683e002de2/status?branch=master)](https://codeship.com/projects/144706)
+
 # Codeship Support
 
 Supporting containers for Codeship continuous delivery

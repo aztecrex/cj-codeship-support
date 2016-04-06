@@ -8,6 +8,6 @@ RUN apk -Uv add python py-pip \
 
 ENV AWS_REGION us-east-1
 
-COPY entrypoint.awscli /usr/local/bin/entrypoint.awscli
-ENTRYPOINT ["entrypoint.awscli"]
-CMD ["--version"]
+COPY entrypoint.aws-base /usr/local/bin/entrypoint.aws-base
+ENTRYPOINT ["entrypoint.aws-base"]
+CMD ["sh"]

@@ -1,0 +1,10 @@
+aws_base:
+  build:
+    image: cjengineering/codeship-aws-base
+    path: src/aws-base
+    dockerfile_path: Dockerfile
+aws_cli:
+  build: ./src/aws-cli
+
+aws_ecs_deploy:
+  build: ./src/aws-ecs-deploy
