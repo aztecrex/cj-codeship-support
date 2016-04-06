@@ -2,10 +2,9 @@ aws_base:
   build:
     image: cjengineering/aws-base
     path: src/aws-base
-
+    dockerfile_path: Dockerfile
 awscli:
   build: ./src/awscli
 
 aws_ecs_deploy:
   build: ./src/aws-ecs-deploy
-
