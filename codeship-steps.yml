@@ -11,6 +11,7 @@
           command: --version
 
 - type: serial
+  tag: master
   encrypted_dockercfg_path: dockercfg.encrypted
   steps:
     - type: push
@@ -28,3 +29,4 @@
       image_name: cjengineering/codeship-aws-ecs-deploy
       image_tag: latest
       registry: *REGISTRY
+
