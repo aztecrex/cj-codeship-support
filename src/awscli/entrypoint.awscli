@@ -1,4 +1,4 @@
 #!/bin/sh
 
-exec /usr/bin/aws --region ${AWS_REGION} "$@"
+exec entrypoint.aws-base aws "$@"
 

@@ -1,11 +1,5 @@
-FROM cjengineering/awscli
+FROM cjengineering/aws-base
 MAINTAINER CJ Developers
 
-COPY entrypoint.update /usr/local/bin/
-ENTRYPOINT ["entrypoint.update"]
-
-CMD [""]
-
-
-
+COPY deploy-ecs.sh /usr/local/bin/
 

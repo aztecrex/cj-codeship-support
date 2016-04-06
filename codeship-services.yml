@@ -1,3 +1,8 @@
+aws_base:
+  build:
+    image: cjengineering/aws-base
+    path: src/aws-base
+
 awscli:
   build: ./src/awscli
 
