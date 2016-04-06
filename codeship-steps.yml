@@ -1,13 +1,14 @@
 - type: serial
-  encrypted_dockercfg_path: dockercfg.encrypted
   steps:
     - type: push
       service: awscli
       image_name: cjengineering/awscli
       image_tag: latest
       registry: &REGISTRY https://index.docker.io/v1/
+      encrypted_dockercfg_path: dockercfg.encrypted
     - type: push
       service: aws_ecs_deploy
       image_name: cjengineering/aws-ecs-deploy
       image_tag: latest
       registry: *REGISTRY
+      encrypted_dockercfg_path: dockercfg.encrypted
