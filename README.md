@@ -5,7 +5,7 @@
 
 Supporting containers for Codeship continuous delivery
 
-## awscli
+## aws-cli
 
 This images houses the AWS command-line interface.  By default, a container
 run from this image displays its awscli and Python versions.
@@ -27,7 +27,7 @@ AWS_SECRET_ACCESS_KEY=A5bH5/kodS9xb6Jqg8UhhZTPYmMxPbOmr3u3/Gv4
 #### codeship-services.yml
 ```yaml
 aws:
-  image: <TBD image name>
+  image: cjengineering/codeship-aws-cli
   encrypted-env-file: aws.env.encrypted
   environment:
     AWS_REGION: us-east-1
@@ -45,3 +45,4 @@ Use the service with any steps you need in your pipeline.
        --template-body file://network.json
     - command:  missiles launch --silo-name alpha
 ```
+
