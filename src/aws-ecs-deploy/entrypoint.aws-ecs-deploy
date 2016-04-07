@@ -37,3 +37,5 @@ if [ "$1" == "sh" ]; then
 fi
 
 go $*
+
+exit 0
