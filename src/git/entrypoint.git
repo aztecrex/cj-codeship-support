@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ "$1" = "" ]; then
+  cat << EOT >&2
+Runs git with supplied arguments.
+
+Special argument "sh" drops you in a shell.
+
+EOT
+elif [ "$1" = "sh" ]; then
+  exec /bin/bash
+else
+  git "$@"
+fi

@@ -8,3 +8,11 @@ RUN  apt-get update \
   && apt-get install git-lfs \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+COPY entrypoint.git /usr/local/bin
+
+RUN mkdir /project
+WORKDIR /project
+
+ENTRYPOINT ["entrypoint.git"]
+CMD [""]
