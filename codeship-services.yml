@@ -8,3 +8,6 @@ aws_cli:
 
 aws_ecs_deploy:
   build: ./src/aws-ecs-deploy
+
+git:
+  build: ./src/git
