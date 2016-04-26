@@ -86,3 +86,17 @@ used to extract service name and cluster name from the inspected
 stacks. ```staging-deployment-cluster``` and ```staging-proxy``` are the
 stacks to inspect.
 
+## git
+This image contains git and includes git lfs extension. By default, shows git version. The special command, 'sh', runs bash.
+
+To run a git command, use ```docker run git [args...]```. To inject properties, use the docker environment (-e) or environment file (--env-file) options. Git runs against a project mounted at ```/project```.
+
+To use with Codeship, define a git service.
+
+#### codeship-services.yml
+```yaml
+git:
+  image: cjengineering/codeship-git
+  volumes:
+    - .:/project
+```
