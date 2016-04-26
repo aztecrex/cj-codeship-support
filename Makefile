@@ -12,6 +12,7 @@ clean:          ## remove the official image tag
 	docker rmi \
 		cjengineering/codeship-git \
 		cjengineering/codeship-aws-ecs-deploy \
+		cjengineering/codeship-aws-s3-deploy \
 		cjengineering/codeship-aws-cli \
 		cjengineering/codeship-aws-base
 
