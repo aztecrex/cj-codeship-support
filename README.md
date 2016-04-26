@@ -93,6 +93,46 @@ used to extract service name and cluster name from the inspected
 stacks. ```staging-deployment-cluster``` and ```staging-proxy``` are the
 stacks to inspect.
 
+## aws-s3-deploy
+
+This image initiates synchronization with S3. Runtime parameters are the source directory, stack-output bucket key, destination path within the bucket, and a list of stacks to inspect.
+
+To use with Codeship, supply an encrypted environment file containing
+appropriate credentials using ```jet encrypt aws.env aws.encrypted.env``` (see [codeship jet](https://codeship.com/documentation/docker/installation/#jet)
+for info) and configure as a service:
+
+#### unencrypted aws environment file, aws.env
+```sh
+AWS_ACCESS_KEY_ID=ASIAJH36GLMHQSO6R7YA
+AWS_SECRET_ACCESS_KEY=A5bH5/kodS9xb6Jqg8UhhZTPYmMxPbOmr3u3/Gv4
+```
+
+#### codeship-services.yml
+```yaml
+deploy:
+  image: cjengineering/codeship-aws-s3-deploy
+  encrypted-env-file: aws.env.encrypted
+  environment:
+    AWS_REGION: us-west-1
+```
+
+Use the configured Codeship service to initiate synchronization with a
+designated S3 bucket.
+
+#### codeship-steps.yml
+```yaml
+- service: deploy
+  tag: master
+  command: assets Bucket site-assets staging-store
+```
+
+In the above, ```assets``` is the name of the asset source directory mounted
+into the container. ```Bucket``` is the key that will be
+used to extract the bucket name from the inspected
+stacks. ```site-assets``` is the path in the bucket to which assets are
+synchronized.  ```staging-store``` is the stack to inspect.
+
+
 ## git
 This image contains git and includes git lfs extension. By default, shows git version. The special command, ```sh```, runs bash.
 
