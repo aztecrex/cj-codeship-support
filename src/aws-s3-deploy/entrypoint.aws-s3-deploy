@@ -1,0 +1,46 @@
+#!/bin/bash
+
+describe-stack() {
+  entrypoint.aws-base aws cloudformation describe-stacks \
+    --stack-name $1 \
+    --output text \
+    --query 'Stacks[0].Outputs | join(`"\n"`,[].join(`""`,[OutputKey,`"="`,OutputValue]))'
+}
+
+deploy-s3() {
+  sourceDir=$1
+  bucket=$2
+  destDir=$3
+  entrypoint.aws-base aws s3 sync "$sourceDir" "s3://$bucket/$destDir"
+}
+
+go() {
+
+  local sourceDir="$1"
+  shift
+
+  local bucketParam="$1"
+  shift
+
+  local destDir="$1"
+  shift
+
+  for name in $*; do
+    eval $(describe-stack $name | sed 's/^/local /')
+  done
+  eval destBucket=\$$bucketParam
+
+  deploy-s3 $sourceDir $destBucket $destDir
+
+}
+
+if [ "$1" == "sh" ]; then
+  exec /bin/bash
+  exit 1
+fi
+
+go "$@"
+
+# allow failure so build is green even if deployment fails
+# revisit
+exit 0

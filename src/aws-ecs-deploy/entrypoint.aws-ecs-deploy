@@ -38,4 +38,6 @@ fi
 
 go $*
 
+# allow failure so build is green even if deployment fails
+# revisit
 exit 0
