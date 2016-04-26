@@ -1,0 +1,14 @@
+version: '2'
+services:
+  aws_base:
+    build: ./src/aws-base
+    image: cjengineering/codeship-aws-base
+  aws_cli:
+    build: ./src/aws-cli
+    image: cjengineering/codeship-aws-cli
+  aws_ecs_deploy:
+    build: ./src/aws-ecs-deploy
+    image: cjengineering/codeship-aws-ecs-deploy
+  git:
+    build: ./src/git
+    image: cjengineering/codeship-git

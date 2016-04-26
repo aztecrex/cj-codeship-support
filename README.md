@@ -5,12 +5,19 @@
 
 Supporting containers for Codeship continuous delivery
 
+## Build
+
+[Docker and Docker Compose](https://docs.docker.com/) are required to build locally. Build with ```make``` (```make help``` for all
+  targets).
+
+## Images
+
 ## aws-cli
 
 This image houses the AWS command-line interface.  By default, a container
 run from this image displays its awscli and Python versions.
 
-To run an aws command, use ```docker run aws <command> [args...]``` .  To
+To run an aws command, use ```docker run cjengineering/codeship-aws-cli <command> [args...]``` .  To
 inject properties, use the docker environment (```-e```) or environment
 file (```--env-file```) options.
 
@@ -87,9 +94,9 @@ stacks. ```staging-deployment-cluster``` and ```staging-proxy``` are the
 stacks to inspect.
 
 ## git
-This image contains git and includes git lfs extension. By default, shows git version. The special command, 'sh', runs bash.
+This image contains git and includes git lfs extension. By default, shows git version. The special command, ```sh```, runs bash.
 
-To run a git command, use ```docker run git [args...]```. To inject properties, use the docker environment (-e) or environment file (--env-file) options. Git runs against a project mounted at ```/project```.
+To run a git command, use ```docker run cjengineering/codeship-git [args...]```. To inject properties, use the docker environment (-e) or environment file (--env-file) options. Git runs against a project mounted at ```/project```.
 
 To use with Codeship, define a git service.
 
