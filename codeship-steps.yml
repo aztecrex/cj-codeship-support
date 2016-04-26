@@ -33,7 +33,7 @@
       registry: *REGISTRY
     - type: push
       service: git
-      image_name: cjengineering/git
+      image_name: cjengineering/codeship-git
       image_tag: latest
       registry: *REGISTRY
 
