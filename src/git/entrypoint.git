@@ -2,12 +2,14 @@
 
 set -e
 
-if [ -n "$GIT_SSH_KEY" ]; then
+# take SSH private key from environment
+if [ -n "$SSH_KEY" ]; then
   mkdir -p "$HOME/.ssh"
-  echo -e $GIT_SSH_KEY >> $HOME/.ssh/id_rsa
+  echo -e $SSH_KEY >> $HOME/.ssh/id_rsa
   chmod 600 $HOME/.ssh/id_rsa
 fi
 
+# install the github host public key
 ssh -t -o "StrictHostKeyChecking no" github.com || /bin/true
 
 
@@ -22,6 +24,5 @@ EOT
 elif [ "$1" = "sh" ]; then
   exec /bin/bash
 else
-  GIT_TRACE=1 git "$@"
-  status=$?
+  exec git "$@"
 fi
