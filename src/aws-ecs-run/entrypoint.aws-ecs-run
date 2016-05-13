@@ -11,7 +11,7 @@ run-task() {
   local taskdef="$1"
   local cluster="$2"
 
-  aws ecs run-task --task-definition "$taskdef" --cluster "$cluster"
+  entrypoint.aws-base aws ecs run-task --task-definition "$taskdef" --cluster "$cluster"
 
 }
 
