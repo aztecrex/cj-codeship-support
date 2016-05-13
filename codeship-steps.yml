@@ -10,6 +10,8 @@
           steps:
             - service: aws_ecs_deploy
               command: /bin/true
+            - service: aws_ecs_run
+              command: /bin/true
             - service: aws_s3_deploy
               command: /bin/true
             - service: aws_cli
@@ -32,6 +34,11 @@
     - type: push
       service: aws_ecs_deploy
       image_name: cjengineering/codeship-aws-ecs-deploy
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      service: aws_ecs_run
+      image_name: cjengineering/codeship-aws-ecs-run
       image_tag: latest
       registry: *REGISTRY
     - type: push

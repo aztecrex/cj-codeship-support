@@ -12,5 +12,8 @@ aws_ecs_deploy:
 aws_s3_deploy:
   build: ./src/aws-s3-deploy
 
+aws_s3_run:
+  build: ./src/aws-s3-run
+
 git:
   build: ./src/git

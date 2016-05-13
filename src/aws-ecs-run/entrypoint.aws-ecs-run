@@ -1,0 +1,50 @@
+#!/bin/bash
+
+describe-stack() {
+  entrypoint.aws-base aws cloudformation describe-stacks \
+    --stack-name $1 \
+    --output text \
+    --query 'Stacks[0].Outputs | join(`"\n"`,[].join(`""`,[OutputKey,`"="`,OutputValue]))'
+}
+
+run-task() {
+  local taskdef="$1"
+  local cluster="$2"
+
+  aws ecs run-task --task-definition "$taskdef" --cluster "$cluster"
+
+}
+
+go() {
+  local taskdefParam="$1"
+  local clusterParam="$2"
+  shift; shift;
+
+  for name in $*; do
+    eval $(describe-stack $name | sed 's/^/local /')
+  done
+  eval taskdef=\$$taskdefParam
+  eval cluster=\$$clusterParam
+
+  run-task $taskdef $cluster
+
+}
+
+
+if [ "$1" = "" ]; then
+  cat >&2 << EOT
+Parameters:
+  sh - drop into bash
+  <task def param name>  <cluster param name> <cloudformation template> [<cloudformation template> ...]
+
+EOT
+  exit 1
+elif [ "$1" = "sh" ]; then
+  exec /bin/bash
+fi
+
+go $*
+
+# allow failure so build is green even if deployment fails
+# revisit
+exit 0
