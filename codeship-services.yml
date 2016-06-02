@@ -3,6 +3,7 @@ aws_base:
     image: cjengineering/codeship-aws-base
     path: src/aws-base
     dockerfile_path: Dockerfile
+
 aws_cli:
   build: ./src/aws-cli
 
@@ -14,6 +15,9 @@ aws_ecs_run:
 
 aws_s3_deploy:
   build: ./src/aws-s3-deploy
+
+aws_docker:
+  build: ./src/aws-docker
 
 git:
   build: ./src/git

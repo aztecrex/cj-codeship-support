@@ -16,6 +16,8 @@
               command: /bin/true
             - service: aws_cli
               command: --version
+            - service: aws_docker
+              command: /bin/true
 
 - type: parallel
   tag: master
@@ -51,4 +53,8 @@
       image_name: cjengineering/codeship-git
       image_tag: latest
       registry: *REGISTRY
-
+    - type: push
+      service: git
+      image_name: cjengineering/codeship-aws-docker
+      image_tag: latest
+      registry: *REGISTRY
