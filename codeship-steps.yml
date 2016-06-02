@@ -17,7 +17,7 @@
             - service: aws_cli
               command: --version
             - service: aws_docker
-              command: --version
+              command: /bin/true
 
 - type: parallel
   tag: master
