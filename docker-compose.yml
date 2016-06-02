@@ -15,6 +15,9 @@ services:
   aws_s3_deploy:
     build: ./src/aws-s3-deploy
     image: cjengineering/codeship-aws-s3-deploy
+  aws_docker:
+    build: ./src/aws-docker
+    image: cjengineering/codeship-aws-docker
   git:
     build: ./src/git
     image: cjengineering/codeship-git
