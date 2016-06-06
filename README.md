@@ -37,7 +37,7 @@ aws:
   image: cjengineering/codeship-aws-cli
   encrypted-env-file: aws.env.encrypted
   environment:
-    AWS_REGION: us-east-1
+    AWS_DEFAULT_REGION: us-east-1
 ```
 
 Use the service with any steps you need in your pipeline.
@@ -75,7 +75,7 @@ deploy:
   image: cjengineering/codeship-aws-ecs-deploy
   encrypted-env-file: aws.env.encrypted
   environment:
-    AWS_REGION: us-west-1
+    AWS_DEFAULT_REGION: us-west-1
 ```
 
 Use the configured Codeship service to initiate a rolling deployment to a
@@ -113,7 +113,7 @@ deploy:
   image: cjengineering/codeship-aws-s3-deploy
   encrypted-env-file: aws.env.encrypted
   environment:
-    AWS_REGION: us-west-1
+    AWS_DEFAULT_REGION: us-west-1
 ```
 
 Use the configured Codeship service to initiate synchronization with a

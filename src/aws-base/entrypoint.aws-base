@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ "$1" = "aws" ]; then
-  shift
-  exec /usr/bin/aws --region ${AWS_REGION} "$@"
-else
-  exec "$@"
-fi
-

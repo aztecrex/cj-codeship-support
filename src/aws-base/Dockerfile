@@ -6,8 +6,4 @@ RUN apk -Uv add python py-pip \
  && apk --purge -v del py-pip \
  && rm -rf /var/cache/apk/*
 
-ENV AWS_REGION us-east-1
-
-COPY entrypoint.aws-base /usr/local/bin/entrypoint.aws-base
-ENTRYPOINT ["entrypoint.aws-base"]
-CMD ["sh"]
+ENV AWS_DEFAULT_REGION us-east-1
