@@ -1,7 +1,7 @@
 #!/bin/bash
 
 describe-stack() {
-  entrypoint.aws-base aws cloudformation describe-stacks \
+   aws cloudformation describe-stacks \
     --stack-name $1 \
     --output text \
     --query 'Stacks[0].Outputs | join(`"\n"`,[].join(`""`,[OutputKey,`"="`,OutputValue]))'
@@ -10,10 +10,10 @@ describe-stack() {
 deploy-ecs() {
   service=$1
   cluster=$2
-  taskDef=$(entrypoint.aws-base aws ecs describe-services --service $service --cluster $cluster --output text --query 'services[0]|   taskDefinition')
-  taskSpec=$(entrypoint.aws-base aws ecs describe-task-definition --task-definition $taskDef --query 'taskDefinition | {containerDefinitions:containerDefinitions,volumes:volumes,family:family}')
-  newTaskDef=$(entrypoint.aws-base aws ecs register-task-definition --cli-input-json "$taskSpec" --output text --query 'taskDefinition.taskDefinitionArn')
-  entrypoint.aws-base aws ecs update-service --service $service --cluster $cluster --task-definition $newTaskDef
+  taskDef=$(aws ecs describe-services --service $service --cluster $cluster --output text --query 'services[0]|   taskDefinition')
+  taskSpec=$(aws ecs describe-task-definition --task-definition $taskDef --query 'taskDefinition | {containerDefinitions:containerDefinitions,volumes:volumes,family:family}')
+  newTaskDef=$(aws ecs register-task-definition --cli-input-json "$taskSpec" --output text --query 'taskDefinition.taskDefinitionArn')
+  aws ecs update-service --service $service --cluster $cluster --task-definition $newTaskDef
 }
 
 go() {
