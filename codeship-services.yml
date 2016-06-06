@@ -25,5 +25,11 @@ aws_s3_deploy:
 aws_docker:
   build: ./src/aws-docker
 
-git:
-  build: ./src/git
+git_base:
+  build:
+    path: src/git-base
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-git-base
+
+git_cli:
+  build: ./src/git-cli

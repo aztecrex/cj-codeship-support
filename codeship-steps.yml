@@ -1,25 +1,31 @@
-- type: parallel
+- type: serial
   steps:
-    - service: git
-      command: version
-    - type: serial
+    - service: bash
+      command: /bin/true
+    - type: parallel
       steps:
-        - service: bash
-          command: /bin/true
-        - service: aws_base
-          command: /bin/true
-        - type: parallel
+        - type: serial
           steps:
-            - service: aws_ecs_deploy
-              command: /bin/true
-            - service: aws_ecs_run
-              command: /bin/true
-            - service: aws_s3_deploy
-              command: /bin/true
-            - service: aws_cli
-              command: --version
-            - service: aws_docker
-              command: /bin/true
+            - service: git_base
+              command: entrypoint.git-base git version
+            - service: git_cli
+              command: version
+        - type: serial
+          steps:
+            - service: aws_base
+              command: aws --version
+            - type: parallel
+              steps:
+                - service: aws_ecs_deploy
+                  command: /bin/true
+                - service: aws_ecs_run
+                  command: /bin/true
+                - service: aws_s3_deploy
+                  command: /bin/true
+                - service: aws_cli
+                  command: --version
+                - service: aws_docker
+                  command: /bin/true
 
 - type: parallel
   tag: master
@@ -51,8 +57,13 @@
       image_tag: latest
       registry: *REGISTRY
     - type: push
-      service: git
-      image_name: cjengineering/codeship-git
+      service: git_base
+      image_name: cjengineering/codeship-git-base
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      service: git_cli
+      image_name: cjengineering/codeship-git-cli
       image_tag: latest
       registry: *REGISTRY
     - type: push

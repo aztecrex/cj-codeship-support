@@ -1,4 +1,8 @@
-FROM ubuntu:15.10
+FROM cjengineering/codeship-bash
+
+RUN apk add \
+  git
+  git-lfs
 
 RUN  apt-get update \
   && apt-get -y install git curl \

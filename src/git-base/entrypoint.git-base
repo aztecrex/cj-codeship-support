@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# install the github host public key
+ssh -t -o "StrictHostKeyChecking no" github.com || /bin/true
+
+# take SSH private key from environment and turn it into an .ssh pk file
+if [ -n "$SSH_KEY" ]; then
+  mkdir -p "$HOME/.ssh"
+  echo -e $SSH_KEY >> $HOME/.ssh/id_rsa
+  chmod 600 $HOME/.ssh/id_rsa
+fi
+
+exec "$@"

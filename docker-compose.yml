@@ -33,6 +33,13 @@ services:
     image: cjengineering/codeship-aws-docker
     depends_on:
       - aws_base
-  git:
-    build: ./src/git
-    image: cjengineering/codeship-git
+  git_base:
+    build: ./src/git-base
+    image: cjengineering/codeship-git-base
+    depends_on:
+      - bash
+  git_cli:
+    build: ./src/git-cli
+    image: cjengineering/codeship-git-cli
+    depends_on:
+      - git_base

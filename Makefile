@@ -10,7 +10,8 @@ build: ${WORK}/.build
 clean:          ## remove the official image tag
 	rm -f ${WORK}/.build
 	-docker rmi \
-		cjengineering/codeship-git \
+		cjengineering/codeship-git-base \
+		cjengineering/codeship-git-cli \
 		cjengineering/codeship-aws-ecs-deploy \
 		cjengineering/codeship-aws-s3-deploy \
 		cjengineering/codeship-aws-cli \
