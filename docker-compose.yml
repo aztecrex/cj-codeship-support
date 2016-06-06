@@ -1,23 +1,38 @@
 version: '2'
 services:
+  bash:
+    build: ./src/bash
+    image: cjengineering/codeship-bash
   aws_base:
     build: ./src/aws-base
     image: cjengineering/codeship-aws-base
+    depends_on:
+      - bash
   aws_cli:
     build: ./src/aws-cli
     image: cjengineering/codeship-aws-cli
+    depends_on:
+      - aws_base
   aws_ecs_deploy:
     build: ./src/aws-ecs-deploy
     image: cjengineering/codeship-aws-ecs-deploy
+    depends_on:
+      - aws_base
   aws_ecs_run:
     build: ./src/aws-ecs-run
     image: cjengineering/codeship-aws-ecs-deploy
+    depends_on:
+      - aws_base
   aws_s3_deploy:
     build: ./src/aws-s3-deploy
     image: cjengineering/codeship-aws-s3-deploy
+    depends_on:
+      - aws_base
   aws_docker:
     build: ./src/aws-docker
     image: cjengineering/codeship-aws-docker
+    depends_on:
+      - aws_base
   git:
     build: ./src/git
     image: cjengineering/codeship-git

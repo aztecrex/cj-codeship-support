@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM cjengineering/codeship-bash
 MAINTAINER CJ Developers
 
 RUN apk -Uv add python py-pip \

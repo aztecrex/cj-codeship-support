@@ -4,6 +4,8 @@
       command: version
     - type: serial
       steps:
+        - service: bash
+          command: /bin/true
         - service: aws_base
           command: /bin/true
         - type: parallel
@@ -54,7 +56,12 @@
       image_tag: latest
       registry: *REGISTRY
     - type: push
-      service: git
+      service: aws_docker
       image_name: cjengineering/codeship-aws-docker
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      service: bash
+      image_name: cjengineering/codeship-bash
       image_tag: latest
       registry: *REGISTRY
