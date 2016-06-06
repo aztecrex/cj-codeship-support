@@ -1,8 +1,14 @@
 bash:
-  build: src/aws-base
+  build:
+    path: src/bash
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-bash
 
 aws_base:
-  build: src/aws-base
+  build:
+    path: src/aws-base
+    dockerfile_path: Dockerfile
+    image: cjentineering/codeship-aws-base
 
 aws_cli:
   build: ./src/aws-cli
