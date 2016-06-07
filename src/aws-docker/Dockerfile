@@ -14,5 +14,5 @@ RUN  apk update \
 
 COPY scripts/* /usr/local/bin/
 COPY entrypoint.aws-docker /usr/local/bin/
-# ENTRYPOINT ["entrypoint.aws-docker"]
-# CMD [""]
+ENTRYPOINT ["entrypoint.aws-docker"]
+CMD [""]
