@@ -5,8 +5,10 @@ set -e
 if [ "$1" = "" ]; then
   cat << EOT >&2
 Runs git with supplied arguments. Mount project directory at /project.
+You can supply an SSH private repository key in the SSH_KEY environment
+variable. Github hosts are added automatically to known_hosts.
 
-Special argument "sh" drops you in a shell.
+Special argument "sh" drops you into a shell.
 
 EOT
   git version >&2

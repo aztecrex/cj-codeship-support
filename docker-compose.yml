@@ -20,7 +20,7 @@ services:
       - aws_base
   aws_ecs_run:
     build: ./src/aws-ecs-run
-    image: cjengineering/codeship-aws-ecs-deploy
+    image: cjengineering/codeship-aws-ecs-run
     depends_on:
       - aws_base
   aws_s3_deploy:
@@ -43,3 +43,8 @@ services:
     image: cjengineering/codeship-git-cli
     depends_on:
       - git_base
+  git_deprecated:
+    build: ./src/git
+    image: cjengineering/codeship-git
+    depends_on:
+      - git_cli

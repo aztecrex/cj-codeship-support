@@ -11,3 +11,8 @@ RUN  apk update \
   && chmod +x /usr/local/bin/docker \
   && apk --purge -v del curl \
   && rm -rf /var/cache/apk/*
+
+COPY scripts/* /usr/local/bin/
+COPY entrypoint.aws-docker /usr/local/bin/
+ENTRYPOINT ["entrypoint.aws-docker"]
+CMD [""]

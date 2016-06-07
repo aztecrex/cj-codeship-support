@@ -1,7 +1,7 @@
 #!/bin/bash
 
 describe-stack() {
-  aws cloudformation describe-stacks \
+  entrypoint.aws-base aws cloudformation describe-stacks \
     --stack-name $1 \
     --output text \
     --query 'Stacks[0].Outputs | join(`"\n"`,[].join(`""`,[OutputKey,`"="`,OutputValue]))'
@@ -11,7 +11,7 @@ deploy-s3() {
   sourceDir=$1
   bucket=$2
   destDir=$3
-  aws s3 sync "$sourceDir" "s3://$bucket/$destDir"
+  entrypoint.aws-base aws s3 sync "$sourceDir" "s3://$bucket/$destDir"
 }
 
 go() {
@@ -34,7 +34,18 @@ go() {
 
 }
 
-if [ "$1" == "sh" ]; then
+
+if [ "$1" = "" ]; then
+  cat >&2 << EOT
+Deploy assets to bucket.
+
+Usage:
+  sh - drop into bash
+  <source directory>  <bucket param name> <destination directory> <cloudformation template> [<cloudformation template> ...]
+
+EOT
+  exit 1
+elif [ "$1" = "sh" ]; then
   exec /bin/bash
   exit 1
 fi

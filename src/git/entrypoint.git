@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "DEPRECATED: container cjengineering/codeship-git," >&2
+echo "            use cjengineering/codeship-git-cli instead" >&2
+
+exec entrypoint.git-cli "$@"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 describe-stack() {
-   aws cloudformation describe-stacks \
+   entrypoint.aws-base aws cloudformation describe-stacks \
     --stack-name $1 \
     --output text \
     --query 'Stacks[0].Outputs | join(`"\n"`,[].join(`""`,[OutputKey,`"="`,OutputValue]))'
@@ -10,10 +10,10 @@ describe-stack() {
 deploy-ecs() {
   service=$1
   cluster=$2
-  taskDef=$(aws ecs describe-services --service $service --cluster $cluster --output text --query 'services[0]|   taskDefinition')
-  taskSpec=$(aws ecs describe-task-definition --task-definition $taskDef --query 'taskDefinition | {containerDefinitions:containerDefinitions,volumes:volumes,family:family}')
-  newTaskDef=$(aws ecs register-task-definition --cli-input-json "$taskSpec" --output text --query 'taskDefinition.taskDefinitionArn')
-  aws ecs update-service --service $service --cluster $cluster --task-definition $newTaskDef
+  taskDef=$(entrypoint.aws-base aws ecs describe-services --service $service --cluster $cluster --output text --query 'services[0]|   taskDefinition')
+  taskSpec=$(entrypoint.aws-base aws ecs describe-task-definition --task-definition $taskDef --query 'taskDefinition | {containerDefinitions:containerDefinitions,volumes:volumes,family:family}')
+  newTaskDef=$(entrypoint.aws-base aws ecs register-task-definition --cli-input-json "$taskSpec" --output text --query 'taskDefinition.taskDefinitionArn')
+  entrypoint.aws-base aws ecs update-service --service $service --cluster $cluster --task-definition $newTaskDef
 }
 
 go() {
@@ -31,13 +31,22 @@ go() {
 
 }
 
-if [ "$1" == "sh" ]; then
+if [ "$1" = "" ]; then
+  cat >&2 << EOT
+Rolling deploy of ECS service
+Usage:
+  sh - drop into bash
+  <service param name>  <cluster param name> <cloudformation template> [<cloudformation template> ...]
+
+EOT
+  exit 1
+elif [ "$1" = "sh" ]; then
   exec /bin/bash
   exit 1
 fi
 
-go $*
+go "$@"
 
 # allow failure so build is green even if deployment fails
-# revisit
+# revisit this cuz it stinks
 exit 0

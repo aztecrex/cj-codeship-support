@@ -1,6 +1,6 @@
 FROM cjengineering/codeship-aws-base
 MAINTAINER CJ Developers
 
-COPY entrypoint.awscli /usr/local/bin/entrypoint.awscli
-ENTRYPOINT ["entrypoint.awscli"]
+COPY entrypoint.aws-cli /usr/local/bin/
+ENTRYPOINT ["entrypoint.aws-cli"]
 CMD ["--version"]

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 describe-stack() {
-  aws cloudformation describe-stacks \
+  entrypoint.aws-base aws cloudformation describe-stacks \
     --stack-name $1 \
     --output text \
     --query 'Stacks[0].Outputs | join(`"\n"`,[].join(`""`,[OutputKey,`"="`,OutputValue]))'
@@ -11,7 +11,7 @@ run-task() {
   local taskdef="$1"
   local cluster="$2"
 
-  aws ecs run-task --task-definition "$taskdef" --cluster "$cluster"
+  entrypoint.aws-base aws ecs run-task --task-definition "$taskdef" --cluster "$cluster"
 
 }
 
@@ -33,7 +33,9 @@ go() {
 
 if [ "$1" = "" ]; then
   cat >&2 << EOT
-Parameters:
+Run a task in ECS.
+
+Usage:
   sh - drop into bash
   <task def param name>  <cluster param name> <cloudformation template> [<cloudformation template> ...]
 
@@ -43,8 +45,9 @@ elif [ "$1" = "sh" ]; then
   exec /bin/bash
 fi
 
-go $*
+go "$@"
 
 # allow failure so build is green even if deployment fails
-# revisit
+# this is not a great idea. should make it configurable (hard in bash)
+# when/if this is re-implemented in another language.
 exit 0
