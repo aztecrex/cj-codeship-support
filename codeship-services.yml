@@ -58,3 +58,11 @@ git_deprecated:
     path: ./src/git-cli
     dockerfile_path: Dockerfile
     image: cjengineering/codeship-git
+
+docker_base:
+  build:
+    path: src/docker-base
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-docker-base
+  add_docker: true
+

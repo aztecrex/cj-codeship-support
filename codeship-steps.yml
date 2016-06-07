@@ -39,6 +39,11 @@
                 - service: aws_docker
                   name: build aws docker
                   command: version
+            - type: serial
+              steps:
+                - service: docker_base
+                  name: build docker base
+                  command: docker version
 
 - type: parallel
   name: publish
@@ -103,5 +108,11 @@
       name: publish bash
       service: bash
       image_name: cjengineering/codeship-bash
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      name: publish docker base
+      service: docker_base
+      image_name: cjengineering/codeship-docker-base
       image_tag: latest
       registry: *REGISTRY
