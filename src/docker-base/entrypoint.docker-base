@@ -1,3 +1,42 @@
 #!/bin/bash
 
-exec "$@"
+help() {
+  cat << XYZ
+  Provide Docker CLI.  You can use all Docker environment variables including
+  DOCKER_CONFIG. If you set DOCKER_CONFIG, you must mount your configuration
+  at the designated coordinates.
+
+  If you do not set DOCKER_CONFIG but mount a configuration file at
+  /config/docker/config.json, the DOCKER_CONFIG variable will be set to
+  that location.
+
+  You can mount the Docker Linux socket at /var/run/docker.sock where it
+  will be automatically detected if none of the docker connection environment
+  variables are set.
+
+XYZ
+
+  docker version
+}
+
+
+# let caller set docker config location but if not, check a well-known location
+# for a docker configuration
+if [ "$DOCKER_CONFIG" = "" ]; then
+  iconfig='/config/docker/config.json'
+  if [ -f "{$iconfig}" ]; then
+    export DOCKER_CONFIG="${iconfig}"
+  fi
+fi
+if [ "$DOCKER_CONFIG" != "" ]; then
+  echo "Using Docker Configuration: ${DOCKER_CONFIG}" >&2
+fi
+
+if [ "$1" = "" ]; then
+  help >&2
+  exit 1
+elif [ "$1" = "help" ]; then
+  help
+else
+  exec "$@"
+fi
