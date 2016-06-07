@@ -2,10 +2,14 @@
 
 WORK=.tmp
 
-.PHONY: build clean realclean help
+.PHONY: build localbuild clean realclean help
 
-build:          ## build the images using docker-compose
+build:          ## build the images using codeship jet
 build: ${WORK}/.build
+
+localbuild:     ## build the images using docker-compose
+localbuild:
+	docker-compose build
 
 clean:          ## remove the official image tag
 	rm -f ${WORK}/.build
@@ -32,8 +36,9 @@ help:           ## show this help
 
 ${WORK}/.build: ${WORK} \
 		$(shell find src -type f) \
-		docker-compose.yml
-	docker-compose build
+		codeship-services.yml \
+		codeship-steps.yml
+	jet steps
 	touch ${WORK}/.build
 
 ${WORK}:

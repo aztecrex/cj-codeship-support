@@ -11,19 +11,34 @@ aws_base:
     image: cjengineering/codeship-aws-base
 
 aws_cli:
-  build: ./src/aws-cli
+  build:
+    path: ./src/aws-cli
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-aws-cli
 
 aws_ecs_deploy:
-  build: ./src/aws-ecs-deploy
+  build:
+    path: ./src/aws-ecs-deploy
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-aws-ecs-deploy
 
 aws_ecs_run:
-  build: ./src/aws-ecs-run
+  build:
+    path: ./src/aws-ecs-run
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-aws-ecs-run
 
 aws_s3_deploy:
-  build: ./src/aws-s3-deploy
+  build:
+    path: ./src/aws-s3-deploy
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-aws-s3-deploy
 
 aws_docker:
-  build: ./src/aws-docker
+  build:
+    path: ./src/aws-docker
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-aws-docker
   add_docker: true
 
 git_base:
@@ -39,4 +54,7 @@ git_cli:
     image: cjengineering/codeship-git-cli
 
 git_deprecated:
-  build: ./src/git-cli
+  build:
+    path: ./src/git-cli
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-git
