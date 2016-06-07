@@ -8,7 +8,7 @@ aws_base:
   build:
     path: src/aws-base
     dockerfile_path: Dockerfile
-    image: cjentineering/codeship-aws-base
+    image: cjengineering/codeship-aws-base
 
 aws_cli:
   build: ./src/aws-cli
@@ -24,6 +24,7 @@ aws_s3_deploy:
 
 aws_docker:
   build: ./src/aws-docker
+  add_docker: true
 
 git_base:
   build:
@@ -32,4 +33,10 @@ git_base:
     image: cjengineering/codeship-git-base
 
 git_cli:
+  build:
+    path: ./src/git-cli
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-git-cli
+
+git_deprecated:
   build: ./src/git-cli

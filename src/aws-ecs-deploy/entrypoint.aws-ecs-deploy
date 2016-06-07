@@ -1,5 +1,15 @@
 #!/bin/bash
 
+help() {
+  cat << EOT
+Rolling deploy of ECS service
+Usage:
+  sh - drop into bash
+  <service param name>  <cluster param name> <cloudformation template> [<cloudformation template> ...]
+
+EOT
+}
+
 describe-stack() {
    entrypoint.aws-base aws cloudformation describe-stacks \
     --stack-name $1 \
@@ -32,20 +42,16 @@ go() {
 }
 
 if [ "$1" = "" ]; then
-  cat >&2 << EOT
-Rolling deploy of ECS service
-Usage:
-  sh - drop into bash
-  <service param name>  <cluster param name> <cloudformation template> [<cloudformation template> ...]
-
-EOT
+  help >&2
   exit 1
+elif [ "$1" = "help" ]; then
+  help
 elif [ "$1" = "sh" ]; then
   exec /bin/bash
-  exit 1
+else
+  go "$@"
 fi
 
-go "$@"
 
 # allow failure so build is green even if deployment fails
 # revisit this cuz it stinks

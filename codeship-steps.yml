@@ -1,33 +1,50 @@
 - type: serial
+  name: build
   steps:
     - service: bash
+      name: bash
       command: /bin/true
     - type: parallel
       steps:
         - type: serial
+          name: git
           steps:
             - service: git_base
+              name: gitbase
               command: entrypoint.git-base git version
             - service: git_cli
-              command: version
+              name: gitcli
+              command: help
+            - service: git_deprecated
+              name: deprecated
+              command: help
         - type: serial
+          name: aws
           steps:
             - service: aws_base
+              name: awsbase
               command: aws --version
             - type: parallel
+              name: variants
               steps:
                 - service: aws_ecs_deploy
-                  command: /bin/true
+                  name: ecs-deploy
+                  command: help
                 - service: aws_ecs_run
-                  command: /bin/true
+                  name: ecs-run
+                  command: help
                 - service: aws_s3_deploy
-                  command: /bin/true
+                  name: s3-deploy
+                  command: help
                 - service: aws_cli
-                  command: --version
+                  name: awscli
+                  command: help
                 - service: aws_docker
-                  command: /bin/true
+                  name: docker
+                  command: version
 
 - type: parallel
+  name: publish
   tag: master
   encrypted_dockercfg_path: dockercfg.encrypted
   steps:
@@ -64,6 +81,11 @@
     - type: push
       service: git_cli
       image_name: cjengineering/codeship-git-cli
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      service: git_deprecated
+      image_name: cjengineering/codeship-git
       image_tag: latest
       registry: *REGISTRY
     - type: push
