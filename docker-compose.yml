@@ -50,6 +50,6 @@ services:
       - git_cli
   docker_base:
     build: ./src/docker-base
-    image: cjengineering/docker-base
+    image: cjengineering/codeship-docker-base
     depends_on:
       - bash
