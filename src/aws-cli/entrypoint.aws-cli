@@ -1,0 +1,25 @@
+#!/bin/sh
+
+help() {
+  echo << EOY
+Run an AWS command. All AWS CLI environment variables are supported. If run
+in ECS, the role of the ECS container host is assumed.
+
+Special commands:
+  - sh : puts you in a bash shell
+
+EOY
+  entrypoint.aws-base aws --version
+}
+
+
+if [ "$1" = "" ]; then
+  help >&2
+  exit 1
+elif [ "$1" = "help" ]; then
+  help
+elif ["$1" = "sh"]; then
+  exec bash
+else
+  exec entrypoint.aws-base aws "$@"
+fi

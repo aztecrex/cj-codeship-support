@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ "$1" = "aws" ]; then
-  shift
-  exec /usr/bin/aws --region ${AWS_REGION} "$@"
-else
-  exec "$@"
+if [ "$AWS_REGION" != "" ]; then
+  export AWS_DEFAULT_REGION="$AWS_REGION"
+  echo "WARNING: AWS_DEFAULT_REGION set to $AWS_DEFAULT_REGION from AWS_REGION" >&2
+  echo "DEPRECATED: AWS_REGION, use AWS_DEFAULT_REGION instead" >&2
 fi
 
+exec "$@"

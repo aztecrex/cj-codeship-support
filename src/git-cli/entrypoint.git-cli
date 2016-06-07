@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+help() {
+  cat << EOT >&2
+Runs git with supplied arguments. Mount project directory at /project.
+You can supply an SSH private repository key in the SSH_KEY environment
+variable. Github hosts are added automatically to known_hosts.
+
+Special argument "sh" drops you into a shell.
+
+EOT
+entrypoint.git-base git version
+}
+
+if [ "$1" = "" ]; then
+  help >&2
+  exit 1
+elif [ "$1" = "help" ]; then
+  help
+elif [ "$1" = "sh" ]; then
+  exec /bin/bash
+else
+  exec entrypoint.git-base git "$@"
+fi

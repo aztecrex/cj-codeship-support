@@ -1,28 +1,6 @@
 #!/bin/bash
 
-set -e
+echo "DEPRECATED: container cjengineering/codeship-git," >&2
+echo "            use cjengineering/codeship-git-cli instead" >&2
 
-# take SSH private key from environment
-if [ -n "$SSH_KEY" ]; then
-  mkdir -p "$HOME/.ssh"
-  echo -e $SSH_KEY >> $HOME/.ssh/id_rsa
-  chmod 600 $HOME/.ssh/id_rsa
-fi
-
-# install the github host public key
-ssh -t -o "StrictHostKeyChecking no" github.com || /bin/true
-
-
-if [ "$1" = "" ]; then
-  cat << EOT >&2
-Runs git with supplied arguments.
-
-Special argument "sh" drops you in a shell.
-
-EOT
-  git version >&2
-elif [ "$1" = "sh" ]; then
-  exec /bin/bash
-else
-  exec git "$@"
-fi
+exec entrypoint.git-cli "$@"

@@ -1,60 +1,100 @@
-- type: parallel
+- type: serial
+  name: build
   steps:
-    - service: git
-      command: version
-    - type: serial
+    - service: bash
+      name: bash
+      command: /bin/true
+    - type: parallel
       steps:
-        - service: aws_base
-          command: /bin/true
-        - type: parallel
+        - type: serial
+          name: git
           steps:
-            - service: aws_ecs_deploy
-              command: /bin/true
-            - service: aws_ecs_run
-              command: /bin/true
-            - service: aws_s3_deploy
-              command: /bin/true
-            - service: aws_cli
-              command: --version
-            - service: aws_docker
-              command: /bin/true
+            - service: git_base
+              name: gitbase
+              command: entrypoint.git-base git version
+            - service: git_cli
+              name: gitcli
+              command: help
+            - service: git_deprecated
+              name: deprecated
+              command: help
+        - type: serial
+          name: aws
+          steps:
+            - service: aws_base
+              name: awsbase
+              command: aws --version
+            - type: parallel
+              name: variants
+              steps:
+                - service: aws_ecs_deploy
+                  name: ecs-deploy
+                  command: help
+                - service: aws_ecs_run
+                  name: ecs-run
+                  command: help
+                - service: aws_s3_deploy
+                  name: s3-deploy
+                  command: help
+                - service: aws_cli
+                  name: awscli
+                  command: help
+                - service: aws_docker
+                  name: docker
+                  command: version
 
 - type: parallel
+  name: publish
   tag: master
   encrypted_dockercfg_path: dockercfg.encrypted
   steps:
     - type: push
       service: aws_base
-      image_name: cjengineering/codeship-aws-base
+      # image_name: cjengineering/codeship-aws-base
       image_tag: latest
       registry: &REGISTRY https://index.docker.io/v1/
     - type: push
       service: aws_cli
-      image_name: cjengineering/codeship-aws-cli
+      # image_name: cjengineering/codeship-aws-cli
       image_tag: latest
       registry: *REGISTRY
     - type: push
       service: aws_ecs_deploy
-      image_name: cjengineering/codeship-aws-ecs-deploy
+      # image_name: cjengineering/codeship-aws-ecs-deploy
       image_tag: latest
       registry: *REGISTRY
     - type: push
       service: aws_ecs_run
-      image_name: cjengineering/codeship-aws-ecs-run
+      # image_name: cjengineering/codeship-aws-ecs-run
       image_tag: latest
       registry: *REGISTRY
     - type: push
       service: aws_s3_deploy
-      image_name: cjengineering/codeship-aws-s3-deploy
+      # image_name: cjengineering/codeship-aws-s3-deploy
       image_tag: latest
       registry: *REGISTRY
     - type: push
-      service: git
-      image_name: cjengineering/codeship-git
+      service: git_base
+      # image_name: cjengineering/codeship-git-base
       image_tag: latest
       registry: *REGISTRY
     - type: push
-      service: git
-      image_name: cjengineering/codeship-aws-docker
+      service: git_cli
+      # image_name: cjengineering/codeship-git-cli
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      service: git_deprecated
+      # image_name: cjengineering/codeship-git
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      service: aws_docker
+      # image_name: cjengineering/codeship-aws-docker
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      service: bash
+      # image_name: cjengineering/codeship-bash
       image_tag: latest
       registry: *REGISTRY

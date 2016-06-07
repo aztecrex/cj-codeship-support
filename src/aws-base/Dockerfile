@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM cjengineering/codeship-bash
 MAINTAINER CJ Developers
 
 RUN apk -Uv add python py-pip \
@@ -6,8 +6,8 @@ RUN apk -Uv add python py-pip \
  && apk --purge -v del py-pip \
  && rm -rf /var/cache/apk/*
 
-ENV AWS_REGION us-east-1
+COPY entrypoint.aws-base /usr/local/bin/
 
-COPY entrypoint.aws-base /usr/local/bin/entrypoint.aws-base
+ENV AWS_DEFAULT_REGION us-east-1
+
 ENTRYPOINT ["entrypoint.aws-base"]
-CMD ["sh"]
