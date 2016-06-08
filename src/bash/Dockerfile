@@ -2,5 +2,5 @@ FROM alpine:3.4
 MAINTAINER CJ Developers
 
 RUN  apk update \
-  && apk add bash \
+  && apk add bash ca-certificates\
   && rm -rf /var/cache/apk/*
