@@ -53,3 +53,8 @@ services:
     image: cjengineering/codeship-docker-base
     depends_on:
       - bash
+  promote:
+    build: ./src/promote
+    image: cjengineering/codeship-promote
+    depends_on:
+      - aws_docker

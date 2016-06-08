@@ -36,9 +36,14 @@
                 - service: aws_cli
                   name: build aws cli
                   command: help
-                - service: aws_docker
-                  name: build aws docker
-                  command: version
+                - type: serial
+                  steps:
+                    - service: aws_docker
+                      name: build aws docker
+                      command: version
+                    - service: promote
+                      name: build promote
+                      command: help
             - type: serial
               steps:
                 - service: docker_base
@@ -102,6 +107,12 @@
       name: publish aws docker
       service: aws_docker
       image_name: cjengineering/codeship-aws-docker
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      name: publish promote
+      service: promote
+      image_name: cjengineering/codeship-promote
       image_tag: latest
       registry: *REGISTRY
     - type: push
