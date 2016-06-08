@@ -1,0 +1,84 @@
+#!/bin/bash
+
+default_config=/config/images.txt
+
+help() {
+  cat << EOCAT
+Promote an image to production.
+
+Run a promotion:
+  docker run [<docker options>] cjengineering/codeship-promote \\
+    <docker repository> [<configfile path>]
+
+Get a Bash shell:
+  docker run -it [<more docker options>] [cjengineering/codeship-promote sh
+
+If configuration file path is not provided, it defaults to ${default_config}.
+The entrypoint waits up to ${SETTLE_BUDGET} seconds for the configuration to appear.
+You can change the number of seconds to wait with the SETTLE_BUDGET environment
+variable. If config is dynamically generated or copied, use mv for
+synchronizaztion to avoid a race condition.
+
+All configuration of cjengineering/codeship-aws-docker is supported.
+
+EOCAT
+}
+
+
+settle_deadline=$(expr $(date +%s) + $SETTLE_BUDGET)
+timeout() {
+  local now=$(date +%s)
+  if [ $now -gt $settle_deadline ]; then
+    echo timeout >&2
+    return 0
+  else
+    echo "remaining settle time: $(expr $settle_deadline - $now)" >&2
+    return 1
+  fi
+}
+
+
+check-file() {
+  echo "checking file exists: '$1'"
+  test -f "$1"
+}
+
+settle-file() {
+  local target="$1"
+
+  while ! check-file "$target"; do
+    if timeout; then
+      return 1
+    fi
+    sleep 2
+  done
+  return 0
+}
+
+settle() {
+  settle-file "$1"
+}
+
+config() {
+  if [ "$2" = "" ]; then
+    echo -n "$default_config"
+  else
+    echo -n "$2"
+  fi
+}
+
+go() {
+  echo "run promotions for '$1' using configuration '$2'"
+}
+
+if [ "$1" = "help" ]; then
+  help
+elif [ "$1" = "" ]; then
+  help >&2
+  exit 1
+elif [ "$1" = "sh" ]; then
+  exec bash
+else
+  settle $(config "$@")
+  go "$1" $(config "$@")
+fi
