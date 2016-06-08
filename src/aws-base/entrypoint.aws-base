@@ -1,9 +1,25 @@
 #!/bin/bash
 
+help() {
+  cat << YYY
+Provides AWS CLI. All CLI environment variables are supported.
+
+YYY
+aws --version
+}
+
 if [ "$AWS_REGION" != "" ]; then
   export AWS_DEFAULT_REGION="$AWS_REGION"
   echo "WARNING: AWS_DEFAULT_REGION set to $AWS_DEFAULT_REGION from AWS_REGION" >&2
   echo "DEPRECATED: AWS_REGION, use AWS_DEFAULT_REGION instead" >&2
 fi
 
-exec "$@"
+
+if [ "$1" = "" ]; then
+  help >&2
+  exit 1
+elif [ "$1" = "help" ]; then
+  help
+else
+  exec "$@"
+fi

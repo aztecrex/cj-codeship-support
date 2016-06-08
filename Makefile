@@ -23,7 +23,8 @@ clean:          ## remove the official image tag
 		cjengineering/codeship-aws-ecs-deploy \
 		cjengineering/codeship-aws-ecs-run \
 		cjengineering/codeship-aws-s3-deploy \
-		cjengineering/codeship-aws-docker
+		cjengineering/codeship-aws-docker \
+		cjengineering/codeship-docker-base
 
 realclean:      ## clean and remove all controls
 realclean: clean
