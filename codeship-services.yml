@@ -65,10 +65,3 @@ docker_base:
     dockerfile_path: Dockerfile
     image: cjengineering/codeship-docker-base
   add_docker: true
-
-promote:
-  build:
-    path: src/promote
-    dockerfile_path: Dockerfile
-    image: cjengineering/codeship-promote
-  add_docker: true
