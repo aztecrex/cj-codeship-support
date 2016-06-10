@@ -1,0 +1,83 @@
+# functions for signaling between containers
+
+# standard rd conventions apply:
+#  - symbol beginning with underscore is not part of public interface
+#  - symbol dependencies flow in the direction of >= underscore count
+#  - private symbols include this package name ("cjbashsig") in their names
+#  - this is subshell friendly. state is stored in a temporary file
+
+if [ $BASH_VERSINFO -lt 4 ]; then
+  echo "Bash 4.0 or greater required"
+  exit 2
+fi
+
+declare -x __cjbashsig_data_f=$(mktemp)
+
+_cjbashsig_with_data() {
+  if [ ! -s "$__cjbashsig_data_f" ]; then
+    declare -Ax signals=()
+  else
+    source "$__cjbashsig_data_f"
+  fi
+
+  "$@"
+  local ret=$?
+
+  declare -p signals > "$__cjbashsig_data_f"
+  unset signals
+
+  return $ret
+}
+
+_cjbashsig_set() {
+  signals["$1"]="$2"
+  return 0
+}
+
+_cjbashsig_have() {
+  eval '[ ${signals['$1']+x} ]'
+}
+
+_cjbashsig_get() {
+  if _cjbashsig_have "$1"; then
+    echo -n "${signals[$1]}"
+    return 0
+  else
+    return 1
+  fi
+}
+
+#signal operations:
+#  signal <name>                  # set signal to default value
+#  signal <name> with <value>     # set signal to specific value
+#  signal <name> present          # zero status if present
+#  signal <name> value            # echo signal value, zero status if present
+signal() {
+  local cmd=${2-}
+  case $cmd in
+    present)
+      _cjbashsig_with_data _cjbashsig_have "$1"
+      return $?
+      ;;
+    with)
+      _cjbashsig_with_data _cjbashsig_set "$1" "$3"
+      return $?
+      ;;
+    value)
+      _cjbashsig_with_data _cjbashsig_get "$1"
+      return $?
+      ;;
+    '')
+      _cjbashsig_with_data _cjbashsig_set "$1" signaled
+  esac
+}
+
+
+# clean up allocated resources. feature behavior is undefined after
+# invoking this.
+close_timeouts() {
+  rm -f "$__cjbashsig_data_f"
+}
+
+
+
