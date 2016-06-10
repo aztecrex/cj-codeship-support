@@ -1,0 +1,122 @@
+# functions for managing timeouts
+
+# standard conventions apply:
+#  - symbol beginning with underscore is not part of public interface
+#  - symbol dependencies flow in the direction of >= underscore count
+#  - private symbols include this package name ("cjbashto") in their names
+#  - this is subshell friendly. state is stored in a temporary file
+
+# Uses environment variable FEATURE_DATA_DIR to choose its store directory.
+# If not set, it uses the TMPDIR value to choose the store directory.
+# Otherwise, uses the /tmp direcory.
+
+
+if [ $BASH_VERSINFO -lt 4 ]; then
+  echo "Bash 4.0 or greater required" >&2
+  [[ $- == *i* ]] || exit -2
+  return -2
+fi
+
+__cjbashto_data_dir="${FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
+mkdir -p "$__cjbashto_data_dir"
+declare -x __cjbashto_data_f="${__cjbashto_data_dir}/cjbashto.data"
+
+_cjbashto_with_data() {
+  if [ ! -s "$__cjbashto_data_f" ]; then
+    declare -Ax deadlines=()
+  else
+    source "$__cjbashto_data_f"
+  fi
+
+  "$@"
+  ret=$?
+
+  declare -p deadlines > "$__cjbashto_data_f"
+  unset deadlines
+  return $ret
+}
+
+_cjbashto_set_deadline() {
+  deadlines[$1]=$(expr $(date +%s) + $2)
+}
+
+_cjbashto_clear_deadline() {
+  unset deadlines[$1]
+}
+
+_cjbashto_remaining() {
+  if [ ${deadlines[$1]+x} ]; then
+    expr ${deadlines[$1]} - $(date +%s)
+  else
+    echo -n "0"
+  fi
+}
+
+# timer commands
+#  timer <name> expired         # check timer expiration, $? is zero if expired
+#  timer <name> active          # check timer expiration, $? zero if not expired
+#  timer <name>                 # initialize a timer to 30s
+#  timer <name> with <n>        # initialize a timer to n seconds
+#  timer <name> clear           # clear all traces of timer
+#  timer <name> remaining       # send remaining seconds as string to stdout
+                                #   $? zero if not expired
+timer() {
+  local name="$1"
+  local cmd="${2-}"
+
+  case $cmd in
+    expired)
+      test $(_cjbashto_with_data _cjbashto_remaining "$name") -le 0
+      ;;
+    active)
+      test $(_cjbashto_with_data _cjbashto_remaining "$name") -gt 0
+      ;;
+    with)
+      _cjbashto_with_data _cjbashto_set_deadline "$name" $3
+      return 0
+      ;;
+    '')
+      _cjbashto_with_data _cjbashto_set_deadline "$name" 30
+      return 0
+      ;;
+    clear)
+      _cjbashto_with_data _cjbashto_clear_deadline "$name"
+      return 0
+      ;;
+    remaining)
+      local rem=$(_cjbashto_with_data _cjbashto_remaining "$name")
+      if [ $rem -gt 0 ]; then
+        echo -n $rem
+        return 0
+      else
+        echo -n 0
+        return 1
+      fi
+      ;;
+    *)
+      echo "unrecognized command '$cmd'" >&2
+      return -1
+      ;;
+  esac
+
+}
+
+# clean up allocated resources. effectively removes all timers
+close_timers() {
+  rm -f "$__cjbashto_data_f"
+}
+
+# wait for a file to become present
+wait_for_file() {
+  local fn="$1"
+  local tn="${2-DEFAULT}"
+  shift;
+
+  while [ ! -f "$fn" ]; do
+    if timer "$tn" expired; then
+      return 1
+    fi
+    sleep 2
+  done
+  return 0;
+}

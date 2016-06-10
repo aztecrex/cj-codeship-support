@@ -11,11 +11,12 @@
 # Otherwise, uses the /tmp direcory.
 
 if [ $BASH_VERSINFO -lt 4 ]; then
-  echo "Bash 4.0 or greater required"
-  exit 2
+  echo "Bash 4.0 or greater required" >&2
+  [[ $- == *i* ]] || exit -2
+  return -2
 fi
 
-__cjbashsig_data_dir="${FEATURE_DATA_DIR-${$TMPDIR-/tmp}}"
+__cjbashsig_data_dir=$(cd "${FEATURE_DATA_DIR-${TMPDIR-/tmp}}" && pwd)
 mkdir -p "$__cjbashsig_data_dir"
 declare -x __cjbashsig_data_f="${__cjbashsig_data_dir}/cjbashsig.data"
 
@@ -83,7 +84,7 @@ signal() {
       ;;
     *)
       echo 'unrecognized command' >&2
-      return 2
+      return -1
       ;;
   esac
 }
