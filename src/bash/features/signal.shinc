@@ -6,12 +6,18 @@
 #  - private symbols include this package name ("cjbashsig") in their names
 #  - this is subshell friendly. state is stored in a temporary file
 
+# Uses environment variable FEATURE_DATA_DIR to choose its store directory.
+# If not set, it uses the TMPDIR value to choose the store directory.
+# Otherwise, uses the /tmp direcory.
+
 if [ $BASH_VERSINFO -lt 4 ]; then
   echo "Bash 4.0 or greater required"
   exit 2
 fi
 
-declare -x __cjbashsig_data_f=$(mktemp)
+__cjbashsig_data_dir="${FEATURE_DATA_DIR-${$TMPDIR-/tmp}}"
+mkdir -p "$__cjbashsig_data_dir"
+declare -x __cjbashsig_data_f="${__cjbashsig_data_dir}/cjbashsig.data"
 
 _cjbashsig_with_data() {
   if [ ! -s "$__cjbashsig_data_f" ]; then
@@ -29,8 +35,13 @@ _cjbashsig_with_data() {
   return $ret
 }
 
+_cjbashsig_clear() {
+  unset signals[$1]
+  return 0
+}
+
 _cjbashsig_set() {
-  signals["$1"]="$2"
+  signals[$1]="$2"
   return 0
 }
 
@@ -47,7 +58,7 @@ _cjbashsig_get() {
   fi
 }
 
-#signal operations:
+# signal operations:
 #  signal <name>                  # set signal to default value
 #  signal <name> with <value>     # set signal to specific value
 #  signal <name> present          # zero status if present
@@ -69,15 +80,21 @@ signal() {
       ;;
     '')
       _cjbashsig_with_data _cjbashsig_set "$1" signaled
+      ;;
+    *)
+      echo 'unrecognized command' >&2
+      return 2
+      ;;
   esac
 }
 
-
-# clean up allocated resources. feature behavior is undefined after
-# invoking this.
-close_timeouts() {
-  rm -f "$__cjbashsig_data_f"
+# signal operations
+#   unsiginal <name>              # clear a signal
+unsignal() {
+  _cjbashsig_with_data _cjbashsig_clear "$1"
 }
 
-
-
+# clean up allocated resources. removes all signal data
+close_signals() {
+  rm -f "$__cjbashsig_data_f"
+}
