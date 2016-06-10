@@ -6,23 +6,30 @@
 #  - private symbols include this package name ("cjbashto") in their names
 #  - this is subshell friendly. state is stored in a temporary file
 
+# Uses environment variable FEATURE_DATA_DIR to choose its store directory.
+# If not set, it uses the TMPDIR value to choose the store directory.
+# Otherwise, uses the /tmp direcory.
+
+
 if [ $BASH_VERSINFO -lt 4 ]; then
   echo "Bash 4.0 or greater required"
   exit 2
 fi
 
-declare -x __cjbashto_deadlines_f=$(mktemp)
+__cjbashto_data_dir="${FEATURE_DATA_DIR-${$TMPDIR-/tmp}}"
+mkdir -p "$__cjbashto_data_dir"
+declare -x __cjbashto_data_f="${__cjbashto_data_dir}/cjbashto.data"
 
 _cjbashto_with_deadlines() {
-  if [ ! -s "$__cjbashto_deadlines_f" ]; then
+  if [ ! -s "$__cjbashto_data_f" ]; then
     declare -Ax deadlines=()
   else
-    source "$__cjbashto_deadlines_f"
+    source "$__cjbashto_data_f"
   fi
 
   "$@"
 
-  declare -p deadlines > "$__cjbashto_deadlines_f"
+  declare -p deadlines > "$__cjbashto_data_f"
   unset deadlines
 }
 
