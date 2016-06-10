@@ -1,0 +1,94 @@
+# functions for managing timeouts
+
+# standard conventions apply:
+#  - symbol beginning with underscore is not part of public interface
+#  - symbol dependencies flow in the direction of >= underscore count
+#  - private symbols include this package name ("cjbashto") in their names
+#  - this is subshell friendly. state is stored in a temporary file
+
+if [ $BASH_VERSINFO -lt 4 ]; then
+  echo "Bash 4.0 or greater required"
+  exit 2
+fi
+
+declare -x __cjbashto_deadlines_f=$(mktemp)
+
+_cjbashto_with_deadlines() {
+  if [ ! -s "$__cjbashto_deadlines_f" ]; then
+    declare -Ax deadlines=()
+  else
+    source "$__cjbashto_deadlines_f"
+  fi
+
+  "$@"
+
+  declare -p deadlines > "$__cjbashto_deadlines_f"
+  unset deadlines
+}
+
+
+_cjbashto_set_deadline() {
+  deadlines[$1]=$(expr $(date +%s) + $2)
+}
+
+_cjbashto_set_deadline_if_empty() {
+  if [ "${deadlines[$1]}" = "" ]; then
+    _cjbashto_set_deadline "$1" $2
+  fi
+}
+
+_cjbashto_remaining() {
+  _cjbashto_set_deadline_if_empty $1 $2
+  expr ${deadlines[$1]} - $(date +%s)
+}
+
+# deterime if deadline has passed. deadline is established the first time
+# this is called for the name or when init_timeout is called. A deadline
+# established here is ~30s from the current time. For control over time
+# budget, use init_timeout()
+#
+# $1 - timeout name, defaults to "DEFAULT"
+timeout() {
+  local name="${1-DEFAULT}"
+
+  local remaining=$(_cjbashto_with_deadlines _cjbashto_remaining "$name" 30)
+
+  if [ 0 -ge $remaining  ]; then
+    echo "Deadline '$name' is past" >&2
+    return 0
+  else
+    echo "${remaining}s remaining on deadline '$name'" >&2
+    return 1
+  fi
+
+}
+
+# establish a named timeout or reset an existing timeout
+# $1 - timeout name, defaults to "DEFAULT"
+# $2 - timeout seconds, defaults to 30
+init_timeout() {
+  local name="${1-DEFAULT}"
+  local budget=${2-30}
+  _cjbashto_with_deadlines _cjbashto_set_deadline "$name" $budget
+}
+
+# clean up allocated resources. feature behavior is undefined after
+# invoking this.
+close_timeouts() {
+  rm -f "$__cjbash_deadlines_f"
+}
+
+# wait for a file to become present
+wait_for_file() {
+  local fn="$1"
+  shift;
+
+  while [ ! -f "$fn" ]; do
+    if timeout "$@"; then
+      return 1
+    fi
+    sleep 2
+  done
+  return 0;
+}
+

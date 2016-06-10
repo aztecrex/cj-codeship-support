@@ -4,3 +4,5 @@ MAINTAINER CJ Developers
 RUN  apk update \
   && apk add bash ca-certificates\
   && rm -rf /var/cache/apk/*
+
+COPY features/* /features/codeship-bash/
