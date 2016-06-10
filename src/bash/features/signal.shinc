@@ -20,6 +20,8 @@ __cjbashsig_data_dir=$(cd "${FEATURE_DATA_DIR-${TMPDIR-/tmp}}" && pwd)
 mkdir -p "$__cjbashsig_data_dir"
 declare -x __cjbashsig_data_f="${__cjbashsig_data_dir}/cjbashsig.data"
 
+export FEATURE_SIGNAL=yes
+
 _cjbashsig_with_data() {
   if [ ! -s "$__cjbashsig_data_f" ]; then
     declare -Ax signals=()
@@ -98,4 +100,21 @@ unsignal() {
 # clean up allocated resources. removes all signal data
 close_signals() {
   rm -f "$__cjbashsig_data_f"
+}
+
+wait_for_signal() {
+  if [ "$FEATURE_TIMER" != "yes" ]; then
+    source $(dirname ${BASH_SOURCE[0]})/timer.shinc
+  fi
+  local sn="$1"
+  local tn="${2-DEFAULT}"
+  while ! signal "$sn" present; do
+    echo "time $tn"
+    timer "$tn" remaining
+    if timer "$tn" expired; then
+      return 1
+    fi
+    sleep 2
+  done
+  return 0
 }

@@ -6,3 +6,4 @@ RUN  apk update \
   && rm -rf /var/cache/apk/*
 
 COPY features/* /features/codeship-bash/
+VOLUME ["features/codeship-bash"]

@@ -21,6 +21,8 @@ __cjbashto_data_dir="${FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
 mkdir -p "$__cjbashto_data_dir"
 declare -x __cjbashto_data_f="${__cjbashto_data_dir}/cjbashto.data"
 
+export FEATURE_TIMER=yes
+
 _cjbashto_with_data() {
   if [ ! -s "$__cjbashto_data_f" ]; then
     declare -Ax deadlines=()
@@ -61,7 +63,7 @@ _cjbashto_remaining() {
 #  timer <name> remaining       # send remaining seconds as string to stdout
                                 #   $? zero if not expired
 timer() {
-  local name="$1"
+  local name="${1-DEFAULT}"
   local cmd="${2-}"
 
   case $cmd in
