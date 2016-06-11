@@ -188,16 +188,16 @@ function signals() {
 
 wait_for_signal() {
   if [ "$FEATURE_TIMER" != "yes" ]; then
-    source $(dirname ${BASH_SOURCE[0]})/timer.shinc
+    echo "timer feature is required" >&2
+    return -1
   fi
-  local sn="$1"
-  local tn="${2-DEFAULT}"
+  local sn="$1" rem
+  shift
+
+  timer active "$@"
   while ! signal "$sn" present; do
-    echo "time $tn"
-    timer "$tn" remaining
-    if timer "$tn" expired; then
-      return 1
-    fi
+    rem=$(timer show "$@") || return 1
+    echo "Waiting for signal '$sn' (${rem}s remaining)" >&2
     sleep 2
   done
   return 0
