@@ -48,17 +48,17 @@ _cjbashto_is_set() {
 }
 
 _cjbashto_set_if_missing() {
-  _cjbashto_is_set "$1" || deadlines[$1]=$(expr $(date +%s) + $2)
+  _cjbashto_is_set $1 || deadlines[$1]=$(expr $(date +%s) + $2)
   return 0
 }
 
 _cjbashto_remaining() {
-  _cjbashto_is_set "$1" && expr ${deadlines[$1]} - $(date +%s) || echo -n 0
+  expr ${deadlines[$1]} - $(date +%s)
   return 0
 }
 
 _cjbashto_is_active() {
-  _cjbashto_is_set "$1" && test $(_cjbashto_remaining "$1") -gt 0
+  _cjbashto_is_set $1 && test $(_cjbashto_remaining $1) -gt 0
 }
 
 # __cjbashto_contains() {
@@ -87,35 +87,34 @@ name specifies a named timer, distinct from any other timer including the
 default. The function defaults to 'show' if no command is provided.
 
 Commands are:
-  show     # (default command) display the current timer value, status to true
-           #   if not expired, false otherwise
-  active   # status to true if not expired, false otherwise
+  show     # display the current timer value, status to true if not expired,
+           #   false otherwise
+  active   # (default command) status to true if not expired, false otherwise
   expired  # status to true if expired, false otherwise
-  reset    # reset the timer with a new time budget, display the timer value,
-           #   status to true if not expired, false otherwise
+  reset    # reset the timer with a new time budget status to true if not
+           #   expired, false otherwise
 
 The with clause overrides the default budget of 30 seconds:
   with <seconds>
 
 Examples:
   timer
-    # show the default timer, initialize to 30 seconds if not
-    # already running  timer, status is true only iff not expired
+    # initialize default timer to 30 seconds if not already running, status
+    # true iff not expired
 
 
   timer with 45 show
     # show the default timer, initialize to 45 seconds if not
-    # already running  timer, status is true only iff not expired
+    # already running  timer, status is true iff not expired
 
 
   timer init9 active with 10
-    # check the active status of the timer named 'init9', initialize
-    # to 10 seconds if it is not already running. status is true iff
-    # not expired
+    # initialize 'timer9' to 10 seconds if it is not already running. status
+    # true iff not expired
 
   timer reset t7 with 42
     # initialize the timer named 't7' to 42 seconds regardles of its
-    # current status. display the timer value and return status true
+    # current status. status true iff not expired
 
 ==============================================================================
 timers() function
@@ -159,7 +158,7 @@ timer() {
     shift
   done
 
-  cmd=${cmd-show}
+  cmd=${cmd-active}
   name=${name-_DEFAULT}
   budget=${budget-30}
 
@@ -172,10 +171,10 @@ timer() {
     expired)
       ! _cjbashto_with_data _cjbashto_is_active $name
       ;;
-    active)
+    active|reset)
       _cjbashto_with_data _cjbashto_is_active $name
       ;;
-    show|reset)
+    show)
       _cjbashto_with_data _cjbashto_remaining $name
       _cjbashto_with_data _cjbashto_is_active $name
       ;;
@@ -201,17 +200,20 @@ timers() {
   return 0
 }
 
+
+
 # wait for a file to become present
 wait_for_file() {
-  local fn="$1"
-  local tn="${2-DEFAULT}"
-  shift;
+  local rem fn="$1"
+  shift
+
+  # ensure that the timer is running
+  timer active "$@"
 
   while [ ! -f "$fn" ]; do
-    if timer "$tn" expired; then
-      return 1
-    fi
+    rem=$(timer show "$@") || return 1
+    echo "Waiting for file '${fn}' (${rem}s remaining)" >&2
     sleep 2
   done
-  return 0;
+  return 0
 }
