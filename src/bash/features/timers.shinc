@@ -1,0 +1,217 @@
+# functions for managing timeouts
+
+# standard conventions apply:
+#  - symbol beginning with underscore is not part of public interface
+#  - symbol dependencies flow in the direction of >= underscore count
+#  - private symbols include this package name ("cjbashto") in their names
+#  - this is subshell friendly. state is stored in a temporary file
+
+# Uses environment variable FEATURE_DATA_DIR to choose its store directory.
+# If not set, it uses the TMPDIR value to choose the store directory.
+# Otherwise, uses the /tmp direcory.
+
+
+if [ $BASH_VERSINFO -lt 4 ]; then
+  echo "Bash 4.0 or greater required" >&2
+  [[ $- == *i* ]] || exit -2
+  return -2
+fi
+
+__cjbashto_data_dir="${FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
+mkdir -p "$__cjbashto_data_dir"
+export __cjbashto_data_f="${__cjbashto_data_dir}/cjbashto.data"
+
+export FEATURE_TIMER=yes
+
+_cjbashto_with_data() {
+  if [ ! -s "$__cjbashto_data_f" ]; then
+    declare -Ax deadlines=()
+  else
+    source "$__cjbashto_data_f"
+  fi
+
+  "$@"
+  ret=$?
+
+  declare -p deadlines > "$__cjbashto_data_f"
+  unset deadlines
+  return $ret
+}
+
+_cjbashto_clear() {
+  unset deadlines[$1]
+  return 0
+}
+
+_cjbashto_is_set() {
+  test ${deadlines[$1]+x}
+}
+
+_cjbashto_set_if_missing() {
+  _cjbashto_is_set "$1" || deadlines[$1]=$(expr $(date +%s) + $2)
+  return 0
+}
+
+_cjbashto_remaining() {
+  _cjbashto_is_set "$1" && expr ${deadlines[$1]} - $(date +%s) || echo -n 0
+  return 0
+}
+
+_cjbashto_is_active() {
+  _cjbashto_is_set "$1" && test $(_cjbashto_remaining "$1") -gt 0
+}
+
+# __cjbashto_contains() {
+#   local e
+#   for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+#   return 1
+# }
+
+_cjbashto_show_err() {
+  echo "$1" >&2
+  _cjbashto_help >&2
+  return -2
+}
+
+_cjbashto_help() {
+  cat << EOHELP
+Timers feature provides named timers for coordination between containers.
+
+==============================================================================
+timer() function
+
+Individual timers are operated with the 'timer' function. The function takes
+a command, an optional name and an optional with clause to set the time
+budget. All commands start a timer if it is not already started.  An optional
+name specifies a named timer, distinct from any other timer including the
+default. The function defaults to 'show' if no command is provided.
+
+Commands are:
+  show     # (default command) display the current timer value, status to true
+           #   if not expired, false otherwise
+  active   # status to true if not expired, false otherwise
+  expired  # status to true if expired, false otherwise
+  reset    # reset the timer with a new time budget, display the timer value,
+           #   status to true if not expired, false otherwise
+
+The with clause overrides the default budget of 30 seconds:
+  with <seconds>
+
+Examples:
+  timer
+    # show the default timer, initialize to 30 seconds if not
+    # already running  timer, status is true only iff not expired
+
+
+  timer with 45 show
+    # show the default timer, initialize to 45 seconds if not
+    # already running  timer, status is true only iff not expired
+
+
+  timer init9 active with 10
+    # check the active status of the timer named 'init9', initialize
+    # to 10 seconds if it is not already running. status is true iff
+    # not expired
+
+  timer reset t7 with 42
+    # initialize the timer named 't7' to 42 seconds regardles of its
+    # current status. display the timer value and return status true
+
+==============================================================================
+timers() function
+
+The feature itself is operated with the 'timers' function. Commands are
+'close' and 'help' .
+
+Examples:
+
+  timers close                 # reset the timers feature, removing all timers
+
+  timers help                  # display usage help
+
+==============================================================================
+Environment
+
+  The FEATURE_DATA_DIR environment variable (currently '$FEATURE_DATA_DIR') specifies
+  the directory where timer data is stored.
+
+EOHELP
+}
+
+timer() {
+  local name cmd budget
+  local err
+  while [ "$1" != "" ]; do
+    case "$1" in
+      with)
+        [ "$budget" = "" ] && budget="$2" || _cjbashto_show_err 'multiple with clauses' || return $?
+        [[ "$budget" =~ ^[0-9]+$ ]] || _cjbashto_show_err 'with requires a number' || return $?
+        shift
+        ;;
+      active|expired|reset|show)
+        [ "$cmd" = "" ] && cmd="$1" || _cjbashto_show_err 'multiple commands' || return $?
+        ;;
+      *)
+        [ "$name" = "" ] && name="$1" || _cjbashto_show_err "second name specified '${1}'" || return $?
+        [[ "$name" =~ ^[_a-zA-Z][_a-zA-Z0-9]*$ ]] || _cjbashto_show_err "invalid name '${1}'" || return $?
+        ;;
+    esac
+    shift
+  done
+
+  cmd=${cmd-show}
+  name=${name-_DEFAULT}
+  budget=${budget-30}
+
+  if [ $cmd = reset ]; then
+    _cjbashto_with_data _cjbashto_clear $name
+  fi
+  _cjbashto_with_data _cjbashto_set_if_missing $name $budget
+
+  case $cmd in
+    expired)
+      ! _cjbashto_with_data _cjbashto_is_active $name
+      ;;
+    active)
+      _cjbashto_with_data _cjbashto_is_active $name
+      ;;
+    show|reset)
+      _cjbashto_with_data _cjbashto_remaining $name
+      _cjbashto_with_data _cjbashto_is_active $name
+      ;;
+  esac
+
+}
+
+timers() {
+  local cmd="$1"
+
+  case "$cmd" in
+    help|'')
+      _cjbashto_help
+      ;;
+    close)
+      rm -f "$__cjbashto_data_f"
+      ;;
+    *)
+      _cjbashto_show_err "unrecognized command '$1'"
+      return $?
+      ;;
+  esac
+  return 0
+}
+
+# wait for a file to become present
+wait_for_file() {
+  local fn="$1"
+  local tn="${2-DEFAULT}"
+  shift;
+
+  while [ ! -f "$fn" ]; do
+    if timer "$tn" expired; then
+      return 1
+    fi
+    sleep 2
+  done
+  return 0;
+}
