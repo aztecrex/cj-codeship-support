@@ -21,8 +21,17 @@ fi
 # fi
 export FEATURE_SIGNALS=yes
 
-export __cjbashsig_data_dir=$(cd "${FEATURE_DATA_DIR-${TMPDIR-/tmp}}" && pwd)
-mkdir -p "$__cjbashsig_data_dir"
+
+__cjbashsig_datadir() {
+  local reldata="${CJ_FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
+  mkdir -p "$reldata"
+  pushd "$reldata" > /dev/null
+  pwd
+  popd > /dev/null
+  return 0
+}
+
+__cjbashsig_data_dir="$(__cjbashsig_datadir)"
 export __cjbashsig_data_f="${__cjbashsig_data_dir}/cjbashsig.data"
 
 if which flock > /dev/null; then
@@ -167,7 +176,6 @@ signal() {
         ;;
       *)
         [ "$name" = "" ] && name="$1" || _cjbashsig_show_err "second name specified '${1}'" || return $?
-        [[ "$name" =~ ^[_a-zA-Z][_a-zA-Z0-9]*$ ]] || _cjbashsig_show_err "invalid name '${1}'" || return $?
         ;;
     esac
     shift

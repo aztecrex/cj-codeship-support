@@ -22,8 +22,16 @@ fi
 # fi
 export FEATURE_TIMERS=yes
 
-export __cjbashto_data_dir="${FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
-mkdir -p "$__cjbashto_data_dir"
+__cjbashto_datadir() {
+  local reldata="${CJ_FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
+  mkdir -p "$reldata"
+  pushd "$reldata" > /dev/null
+  pwd
+  popd > /dev/null
+  return 0
+}
+
+__cjbashto_data_dir="$(__cjbashto_datadir)"
 export __cjbashto_data_f="${__cjbashto_data_dir}/cjbashto.data"
 
 if which flock > /dev/null; then
@@ -178,7 +186,7 @@ timer() {
         ;;
       *)
         [ "$name" = "" ] && name="$1" || _cjbashto_show_err "second name specified '${1}'" || return $?
-        [[ "$name" =~ ^[_a-zA-Z][_a-zA-Z0-9]*$ ]] || _cjbashto_show_err "invalid name '${1}'" || return $?
+        [[ "$name" =~ ^[_a-zA-Z][-_a-zA-Z0-9]*$ ]] || _cjbashto_show_err "invalid name '${1}'" || return $?
         ;;
     esac
     shift

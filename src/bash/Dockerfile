@@ -5,7 +5,8 @@ RUN  apk update \
   && apk add bash ca-certificates\
   && rm -rf /var/cache/apk/*
 
-ENV FEATURE_DATA_DIR=/share/features
+ENV CJ_FEATURE_DATA_DIR=/share/features
+ENV CJ_FEATURE_SCRIPT_DIR=/features
 
-COPY features/* /features/codeship-bash/
+COPY features/* $CJ_FEATURE_SCRIPT_DIR/codeship-bash/
 VOLUME ["features/codeship-bash"]
