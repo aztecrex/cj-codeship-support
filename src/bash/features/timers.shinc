@@ -17,13 +17,37 @@ if [ $BASH_VERSINFO -lt 4 ]; then
   return -2
 fi
 
-__cjbashto_data_dir="${FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
+# if [ "$FEATURE_TIMERS" = "yes" ]; then
+#   return 0
+# fi
+export FEATURE_TIMERS=yes
+
+export __cjbashto_data_dir="${FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
 mkdir -p "$__cjbashto_data_dir"
 export __cjbashto_data_f="${__cjbashto_data_dir}/cjbashto.data"
 
-export FEATURE_TIMER=yes
+if which flock > /dev/null; then
+  exec 8>"${__cjbashto_data_dir}/cjbashto.lock"
+fi
+
+__cjbashto_lock() {
+  if which flock > /dev/null; then
+    flock -x 8
+  fi
+  return 0
+}
+
+__cjbashto_unlock() {
+  if which flock > /dev/null; then
+    flock -u 8
+  fi
+  return 0
+}
+
+
 
 _cjbashto_with_data() {
+  __cjbashto_lock
   if [ ! -s "$__cjbashto_data_f" ]; then
     declare -Ax deadlines=()
   else
@@ -35,6 +59,8 @@ _cjbashto_with_data() {
 
   declare -p deadlines > "$__cjbashto_data_f"
   unset deadlines
+
+  __cjbashto_unlock
   return $ret
 }
 
