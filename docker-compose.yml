@@ -33,6 +33,11 @@ services:
     image: cjengineering/codeship-aws-docker
     depends_on:
       - aws_base
+  aws_unsecret:
+    build: ./src/aws-unsecret
+    image: cjengineering/codeship-aws-unsecret
+    depends_on:
+      - aws_base
   git_base:
     build: ./src/git-base
     image: cjengineering/codeship-git-base
