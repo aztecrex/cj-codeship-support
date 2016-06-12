@@ -36,6 +36,9 @@
                 - service: aws_cli
                   name: build aws cli
                   command: help
+                - service: aws_unsecret
+                  name: build aws unsecret
+                  command: help
                 - service: aws_docker
                   name: build aws docker
                   command: version
@@ -96,6 +99,12 @@
       name: publish git
       service: git_deprecated
       image_name: cjengineering/codeship-git
+      image_tag: latest
+      registry: *REGISTRY
+    - type: push
+      name: publish aws unsecret
+      service: aws_unsecret
+      image_name: cjengineering/codeship-unsecret
       image_tag: latest
       registry: *REGISTRY
     - type: push
