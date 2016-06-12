@@ -34,6 +34,12 @@ aws_s3_deploy:
     dockerfile_path: Dockerfile
     image: cjengineering/codeship-aws-s3-deploy
 
+aws_unsecret:
+  build:
+    path: ./src/aws-unsecret
+    dockerfile_path: Dockerfile
+    image: cjengineering/codeship-aws-unsecret
+
 aws_docker:
   build:
     path: ./src/aws-docker
@@ -65,4 +71,3 @@ docker_base:
     dockerfile_path: Dockerfile
     image: cjengineering/codeship-docker-base
   add_docker: true
-

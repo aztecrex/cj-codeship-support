@@ -1,0 +1,253 @@
+# functions for signaling between containers
+
+# standard rd conventions apply:
+#  - symbol beginning with underscore is not part of public interface
+#  - symbol dependencies flow in the direction of >= underscore count
+#  - private symbols include this package name ("cjbashsig") in their names
+#  - this is subshell friendly. state is stored in a temporary file
+
+# Uses environment variable FEATURE_DATA_DIR to choose its store directory.
+# If not set, it uses the TMPDIR value to choose the store directory.
+# Otherwise, uses the /tmp direcory.
+
+if [ $BASH_VERSINFO -lt 4 ]; then
+  echo "Bash 4.0 or greater required" >&2
+  [[ $- == *i* ]] || exit -2
+  return -2
+fi
+
+# if [ "$FEATURE_SIGNALS" = "yes" ]; then
+#   return 0
+# fi
+export FEATURE_SIGNALS=yes
+
+
+__cjbashsig_datadir() {
+  local reldata="${CJ_FEATURE_DATA_DIR-${TMPDIR-/tmp}}"
+  mkdir -p "$reldata"
+  pushd "$reldata" > /dev/null
+  pwd
+  popd > /dev/null
+  return 0
+}
+
+__cjbashsig_data_dir="$(__cjbashsig_datadir)"
+export __cjbashsig_data_f="${__cjbashsig_data_dir}/cjbashsig.data"
+
+if which flock > /dev/null; then
+  exec 8>"${__cjbashsig_data_dir}/cjbashsig.lock"
+fi
+
+__cjbashsig_lock() {
+  if which flock > /dev/null; then
+    flock -x 8
+  fi
+  return 0
+}
+
+__cjbashsig_unlock() {
+  if which flock > /dev/null; then
+    flock -u 8
+  fi
+  return 0
+}
+
+
+_cjbashsig_with_data() {
+  __cjbashsig_lock
+  if [ ! -s "$__cjbashsig_data_f" ]; then
+    declare -Ax signals=()
+  else
+    source "$__cjbashsig_data_f"
+  fi
+
+  "$@"
+  local ret=$?
+
+  declare -p signals > "$__cjbashsig_data_f"
+  unset signals
+
+  __cjbashsig_unlock
+  return $ret
+}
+
+_cjbashsig_clear() {
+  unset signals[$1]
+  return 0
+}
+
+_cjbashsig_set() {
+  signals[$1]="$2"
+  return 0
+}
+
+_cjbashsig_have() {
+  if [ ${signals[$1]+x} ]; then
+    [ "$2" == "" ] || [ "$2" == "${signals[$1]}" ]
+  else
+    return 1
+  fi
+}
+
+_cjbashsig_get() {
+  if _cjbashsig_have $1 "$2"; then
+    echo -n "${signals[$1]}"
+  fi
+  return 0
+}
+
+_cjbashsig_show_err() {
+  echo "$1" >&2
+  return -2
+}
+
+_cjbashsig_help() {
+  cat << EOHELP
+Set and check signals.
+
+==============================================================================
+function signal()
+
+A signal is a named value that can be checked for presence or for presence
+with a particular value.  The function takes a signal name, a command, and
+an optional signal value. If command is not present, 'set' is assumed.
+
+Commands:
+
+  set      # (default command) set a signal. default value is 'signaled'
+  clear    # clear a signal, value is not allowed
+  present  # return true status if signal is present and optinally matches
+           #   an expected value.
+  show     # show the value of a signal if present and optionally matches
+           #   an expected value
+  name     # parse options and show the name of the signal
+
+The with clause provides the value to set or check.
+
+Examples:
+
+  signal found
+    # set the value of the 'found' signal to 'signaled'
+
+  signal found with zero
+    # set the value of the 'found' signal to 'signaled'
+
+  signal found present
+    # status true iff signal 'found' is set
+
+  signal found present with two
+    # status true iff signal 'found' is set to value 'two'
+
+  signal show found
+    # print the value of signal 'found' to stdout if set, status true
+    # iff signal is set
+
+  signal with two show found
+    # print the value of signal 'found' to stdout if set to value 'two',
+    # status true iff signal is set to 'two'
+
+  signal with other found name
+    # print 'found'
+
+==============================================================================
+function signals()
+
+The signals functions operates on the feature itself. Commands are:
+
+  close      # clean feature data. removes all signals
+  help       # print the help text to stdout
+
+
+EOHELP
+}
+
+signal() {
+  local name cmd value
+  local err
+  while [ "$1" != "" ]; do
+    case "$1" in
+      with)
+        [ "$value" = "" ] && value="$2" || _cjbashsig_show_err 'multiple with clauses' || return $?
+        [ "$value" != "" ] || _cjbashsig_show_err 'value not specified in with clause' || return $?
+        shift
+        ;;
+      present|show|set|clear|name)
+        [ "$cmd" = "" ] && cmd="$1" || _cjbashsig_show_err 'multiple commands' || return $?
+        ;;
+      *)
+        [ "$name" = "" ] && name="$1" || _cjbashsig_show_err "second name specified '${1}'" || return $?
+        ;;
+    esac
+    shift
+  done
+
+  cmd=${cmd-set}
+  [ ! -z $name ] || _cjbashsig_show_err 'name is required' || return $?
+
+  case $cmd in
+    present)
+      _cjbashsig_with_data _cjbashsig_have $name "$value"
+      ;;
+    set)
+      _cjbashsig_with_data _cjbashsig_set $name "${value-signaled}"
+      return 0
+      ;;
+    show)
+      _cjbashsig_with_data _cjbashsig_get $name "$value"
+      _cjbashsig_with_data _cjbashsig_have $name "$value"
+      ;;
+    name)
+      echo $name
+      return 0
+      ;;
+    clear)
+      [ -z "$value" ] || _cjbashsig_show_err 'with clause not allowed for command' || return $?
+      _cjbashsig_with_data _cjbashsig_clear $name
+      return 0
+      ;;
+  esac
+}
+
+
+function signals() {
+  case "$1" in
+    help)
+      _cjbashsig_help
+      ;;
+    close)
+      rm -f "$__cjbashsig_data_f"
+      ;;
+    *)
+      _cjbashsig_show_err "unrecognized command '$1'" || return $?
+  esac
+  return 0
+}
+
+
+wait_for_signal() {
+  if [ "$FEATURE_TIMERS" != "yes" ]; then
+    echo "timers feature is required for this function" >&2
+    echo "perhaps source $(dirname ${BASH_SOURCE[0]})/timers.shinc" >&2
+    return -1
+  fi
+  local sigopt=() tmopt=()
+  while [ "$1" != "" ] && [ "$1" != "timer" ]; do
+    sigopt+=("$1")
+    shift
+  done
+  shift
+  while [ "$1" != "" ]; do
+    tmopt+=("$1")
+    shift
+  done
+
+  local sn=$(signal name "${sigopt[@]}")
+
+  timer active "$@"
+  while ! signal present "${sigopt[@]}"; do
+    rem=$(timer show "${tmopt[@]}") || return 1
+    echo "Waiting for signal '$sn' (${rem}s remaining)" >&2
+    sleep 2
+  done
+  return 0
+}

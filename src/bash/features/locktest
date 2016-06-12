@@ -1,0 +1,16 @@
+#!/bin/sh
+
+ME=`basename "$0"`
+LCK="/share/${ME}.LCK"
+exec 8>$LCK
+
+flock -x 8
+echo "I'm in ($$)"
+sleep 5
+flock -x 8
+echo "I reentered ($$)"
+sleep 3
+echo "I'm done ($$)"
+flock -u 8
+sleep 5
+echo "I'm really done ($$)"

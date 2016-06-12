@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if [ -f signals.shinc ]; then
+  source signals.shinc
+else
+  source /features/codeship-bash/signals.shinc
+fi
+
+if [ -f timers.shinc ]; then
+  source timers.shinc
+else
+  source /features/codeship-bash/timers.shinc
+fi
+
+signals close
+timers close
+
+

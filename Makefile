@@ -13,18 +13,11 @@ localbuild:
 
 clean:          ## remove the official image tag
 	rm -f ${WORK}/.build
-	-docker rmi \
-		cjengineering/codeship-bash \
-		cjengineering/codeship-git-base \
-		cjengineering/codeship-git-cli \
-		cjengineering/codeship-git \
-		cjengineering/codeship-aws-base \
-		cjengineering/codeship-aws-cli \
-		cjengineering/codeship-aws-ecs-deploy \
-		cjengineering/codeship-aws-ecs-run \
-		cjengineering/codeship-aws-s3-deploy \
-		cjengineering/codeship-aws-docker \
-		cjengineering/codeship-docker-base
+	-docker images \
+	    | grep 'cjengineering/codeship-' \
+			| cut -d ' ' -f 1 \
+			| xargs docker rmi -f
+
 
 realclean:      ## clean and remove all controls
 realclean: clean
