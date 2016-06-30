@@ -4,6 +4,7 @@ FROM cjengineering/codeship-bash
 #       becomes part of the main packages
 
 RUN  apk update \
+  && apk add openssh \
   && apk add git \
   && apk add git-lfs \
         --update-cache \
