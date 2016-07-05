@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-source $CJ_FEATURE_SCRIPT_DIR/codeship-bash/timers.shinc
-source $CJ_FEATURE_SCRIPT_DIR/codeship-bash/signals.shinc
-source $CJ_FEATURE_SCRIPT_DIR/codeship-aws-unsecret/secrets.shinc
-
+source $CJ_FEATURE_SCRIPT_DIR/bash/timers.shinc
+source $CJ_FEATURE_SCRIPT_DIR/bash/signals.shinc
+source $CJ_FEATURE_SCRIPT_DIR/aws-unsecret/secrets.shinc
 
 secret=$(wait_for_secret "$1") && echo "secret is $secret" || echo timeout
 

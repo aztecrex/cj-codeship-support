@@ -8,5 +8,5 @@ RUN  apk update \
 ENV CJ_FEATURE_DATA_DIR=/share/features
 ENV CJ_FEATURE_SCRIPT_DIR=/features
 
-COPY features/* $CJ_FEATURE_SCRIPT_DIR/codeship-bash/
-VOLUME ["features/codeship-bash"]
+COPY features/* features/bash/
+VOLUME ["features/bash"]

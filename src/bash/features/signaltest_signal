@@ -3,7 +3,7 @@
 if [ -f signals.shinc ]; then
   source signals.shinc
 else
-  source /features/codeship-bash/signals.shinc
+  source /features/bash/signals.shinc
 fi
 
 signal bob
